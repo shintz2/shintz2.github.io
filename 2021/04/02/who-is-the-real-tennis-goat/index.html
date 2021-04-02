@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.81.0" />
+
+
+<title>Who is the real tennis GOAT? - Stephen Hintz&#39;s Github Site</title>
+<meta property="og:title" content="Who is the real tennis GOAT? - Stephen Hintz&#39;s Github Site">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/stephenhintz">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/stephen_hintz">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">10 min read</span>
+    
+
+    <h1 class="article-title">Who is the real tennis GOAT?</h1>
+
+    
+    <span class="article-date">2021-04-02</span>
+    
+
+    <div class="article-content">
+      
+<script src="/2021/04/02/who-is-the-real-tennis-goat/index_files/header-attrs/header-attrs.js"></script>
+<script src="/2021/04/02/who-is-the-real-tennis-goat/index_files/kePrint/kePrint.js"></script>
+<link href="/2021/04/02/who-is-the-real-tennis-goat/index_files/lightable/lightable.css" rel="stylesheet" />
+
+
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+## ✓ tibble  3.0.5     ✓ dplyr   1.0.3
+## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(kableExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;kableExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     group_rows</code></pre>
+<pre class="r"><code>library(ggrepel)
+library(cowplot)</code></pre>
+<pre class="r"><code>returnstats &lt;- read_csv(&quot;Career Return Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Return Rating` = col_character(),
+##   `% 1st Serve Return Points Won` = col_character(),
+##   `% 2nd Serve Return Points Won` = col_character(),
+##   `% Return Games Won` = col_character(),
+##   `% Break Points Converted` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; returnleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>returnleadersall %&gt;% summarise(AvgReturn = mean(`Return Rating`)) </code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      139.</code></pre>
+<pre class="r"><code>servestats &lt;- read_csv(&quot;Career Serve Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Serve Rating` = col_character(),
+##   `% 1st Serve` = col_character(),
+##   `% 1st Serve Points Won` = col_character(),
+##   `% 2nd Serve Points Won` = col_character(),
+##   `% Service Games Won` = col_character(),
+##   `Aces Per Match` = col_character(),
+##   `Avg Double Faults/Match` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; serveleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; serveleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; returnleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; serveleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; returnleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; serveleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; returnleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>serveleadersall %&gt;% summarise(AvgServe = mean(`Serve Rating`)) </code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     256.</code></pre>
+<pre class="r"><code>returnleadersall %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      139.</code></pre>
+<pre class="r"><code>servereturn &lt;- returnleadersall %&gt;% left_join(serveleadersall)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>Big3 &lt;- c(&quot;Rafael Nadal&quot;, &quot;Novak Djokovic&quot;, &quot;Roger Federer&quot;)</code></pre>
+<pre class="r"><code>B3 &lt;- servereturn %&gt;% filter(Player %in% Big3)</code></pre>
+<pre class="r"><code>ggplot() + 
+  geom_point(data=servereturn, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_hline(yintercept=138.6383, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=255.5443, color=&quot;dark grey&quot;) +
+    geom_text(aes(x=307, y=165, label=
+  &quot;Good Serve,
+Good Return&quot;), color=&quot;blue&quot;) +
+  geom_text(aes(x=225, y=105, label=
+&quot;Bad Serve, 
+Bad Return&quot;), color=&quot;blue&quot;) +
+  geom_text_repel(data=B3, aes(x=`Serve Rating`, y=`Return Rating`, label=Player))+
+  labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;The &#39;Big Three&#39; stand far apart from the rest&quot;, subtitle=&quot;Federer has the best serve, but Nadal is the best all-around on all surfaces.&quot;, caption=&quot;Source: atptour.com | By Stephen Hintz&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 7),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="/2021/04/02/who-is-the-real-tennis-goat/index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>servereturntop &lt;- servereturn %&gt;% mutate(ServePlusReturn = (`Serve Rating` + `Return Rating`)) %&gt;% top_n(10)</code></pre>
+<pre><code>## Selecting by ServePlusReturn</code></pre>
+<pre class="r"><code>servereturntop %&gt;% 
+  select(Player, `Serve Rating`, `Return Rating`) %&gt;%
+  pivot_longer(
+    cols = -Player,
+    names_to=&quot;Type&quot;, 
+    values_to=&quot;Rating&quot;) -&gt; servereturnchart</code></pre>
+<pre class="r"><code>ggplot(servereturnchart, aes(x=reorder(Player, Rating), weight=Rating, fill=Type)) + 
+  geom_bar() + 
+  coord_flip() + labs(x=&quot;Player&quot;, y=&quot;Cumulative Serve-Return Rating&quot;, title=&quot;Top ten all-around rated players&quot;, subtitle=&quot;Among all-time tennis legends, the &#39;Big Three&#39; sit at the top in \ncumulative serve-return ratings.&quot;, caption=&quot;Source: ATP Tour | By Stephen Hintz&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    plot.subtitle = element_text(size = 12),
+    axis.text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="/2021/04/02/who-is-the-real-tennis-goat/index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>returnstats &lt;- read_csv(&quot;Career Return Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Return Rating` = col_character(),
+##   `% 1st Serve Return Points Won` = col_character(),
+##   `% 2nd Serve Return Points Won` = col_character(),
+##   `% Return Games Won` = col_character(),
+##   `% Break Points Converted` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; returnleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats &lt;- read_csv(&quot;Career Serve Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Serve Rating` = col_character(),
+##   `% 1st Serve` = col_character(),
+##   `% 1st Serve Points Won` = col_character(),
+##   `% 2nd Serve Points Won` = col_character(),
+##   `% Service Games Won` = col_character(),
+##   `Aces Per Match` = col_character(),
+##   `Avg Double Faults/Match` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; serveleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; serveleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; returnleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; serveleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; returnleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; serveleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; returnleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>returnleadersall %&gt;% summarise(AvgReturn = mean(`Return Rating`)) </code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      139.</code></pre>
+<pre class="r"><code>serveleadersall %&gt;% summarise(AvgServe = mean(`Serve Rating`)) </code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     256.</code></pre>
+<pre class="r"><code>servereturnhard &lt;- returnleadershard %&gt;% left_join(serveleadershard)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>servereturnclay &lt;- returnleadersclay %&gt;% left_join(serveleadersclay)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>servereturngrass &lt;- returnleadersgrass %&gt;% left_join(serveleadersgrass)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>Big3 &lt;- c(&quot;Rafael Nadal&quot;, &quot;Novak Djokovic&quot;, &quot;Roger Federer&quot;)</code></pre>
+<pre class="r"><code>B3Clay &lt;- servereturnclay %&gt;% filter(Player %in% Big3)
+B3Grass &lt;- servereturngrass %&gt;% filter(Player %in% Big3)
+B3Hard &lt;- servereturnhard %&gt;% filter(Player %in% Big3)</code></pre>
+<pre class="r"><code>serveleadersgrass %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     275.</code></pre>
+<pre class="r"><code>returnleadersgrass %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      132.</code></pre>
+<pre class="r"><code>serveleadersclay %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     251.</code></pre>
+<pre class="r"><code>returnleadersclay %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      148.</code></pre>
+<pre class="r"><code>serveleadershard %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     275.</code></pre>
+<pre class="r"><code>returnleadershard %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      137.</code></pre>
+<pre class="r"><code>Clay &lt;- ggplot() + 
+  geom_point(data=servereturnclay, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Clay, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Clay, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Clay&quot;) + theme_minimal() +
+  geom_hline(yintercept=147.8383, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=251.0672, color=&quot;dark grey&quot;) +
+   theme(
+    plot.title = element_text(size = 15, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9),
+    legend.position = &quot;none&quot;    
+    )</code></pre>
+<pre class="r"><code>Grass &lt;- ggplot() + 
+  geom_point(data=servereturngrass, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Grass, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Grass, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Grass&quot;) + theme_minimal() +
+  geom_hline(yintercept=131.6597, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=274.7437, color=&quot;dark grey&quot;) +
+  theme(
+    plot.title = element_text(size = 15, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9),
+    legend.position = &quot;none&quot;
+    )</code></pre>
+<pre class="r"><code>Hard &lt;- ggplot() + 
+  geom_point(data=servereturnhard, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Hard, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Hard, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Hard&quot;) + theme_minimal() + 
+  geom_hline(yintercept=136.794, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=274.7437, color=&quot;dark grey&quot;) +
+  theme(
+    plot.title = element_text(size = 15, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9),
+    legend.position = &quot;none&quot;
+    ) </code></pre>
+<pre class="r"><code>plot_grid(Hard, Grass, Clay, ncol=1) + labs(title=&quot;Biggest stars all shine on different surfaces&quot;, subtitle = &quot;All are consistent, but Nadal dominates on clay, Federer favors grass, and Djokovic shines on hard courts.&quot;, caption = &quot;Source: ATP Tour | By Stephen Hintz&quot;) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 15),
+    plot.subtitle = element_text(size = 11),
+    axis.text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    legend.position = &quot;none&quot;
+    )</code></pre>
+<pre><code>## Warning: Removed 303 rows containing missing values (geom_point).</code></pre>
+<p><img src="/2021/04/02/who-is-the-real-tennis-goat/index_files/figure-html/unnamed-chunk-37-1.png" width="960" /></p>
+<pre class="r"><code>menstitles &lt;- read_csv(&quot;Men&#39;s Titles - Sheet1.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   .default = col_character(),
+##   Wins = col_double(),
+##   Losses = col_double(),
+##   WinStraightSets = col_double(),
+##   LossStraightSets = col_double(),
+##   AvgSetLengthinWins = col_double(),
+##   AvgSetLengthLoss = col_double(),
+##   Wimbledon = col_double(),
+##   FrenchOpen = col_double(),
+##   AustralianOpen = col_double(),
+##   USOpen = col_double(),
+##   OlympicBronze = col_double(),
+##   OlympicSilver = col_double(),
+##   OlympicGold = col_double()
+## )
+## ℹ Use `spec()` for the full column specifications.</code></pre>
+<pre class="r"><code>champs &lt;- menstitles %&gt;%
+  filter(Player == &quot;Rafael Nadal&quot; | Player == &quot;Roger Federer&quot; | Player == &quot;Novak Djokovic&quot;) %&gt;%
+  select(Player, Wimbledon, AustralianOpen, USOpen, FrenchOpen, OlympicGold) %&gt;%
+  rename(Aussie = AustralianOpen, US = USOpen, French=FrenchOpen, Olympic = OlympicGold) %&gt;%
+  pivot_longer(
+    cols=-Player,
+    names_to = &quot;Slams&quot;,
+    values_to = &quot;Wins&quot;
+  )</code></pre>
+<pre class="r"><code>ggplot() + geom_bar(data=champs, aes(x=Slams, weight=Wins, fill=Slams)) + facet_wrap(~Player) + scale_fill_manual(values=c(&quot;#377DB8&quot;, &quot;#CB5223&quot;, &quot;#D89F39&quot;, &quot;#00288b&quot;, &quot;#007b22&quot; )) + theme(axis.text = element_text(size=10)) + 
+  labs(y=&quot;Titles&quot;, title=&quot;Title breakdown for &#39;Big Three&#39;&quot;, subtitle = &quot;Nadal owns the French Open, Federer the Wimbledon Classic, and Djokovic the Australian Open. \nAll have an olympic medal, but Nadal is the only player to have multiple majors on all surfaces.&quot;, caption = &quot;Source: ATP Tour | By Stephen Hintz&quot;) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 25, face = &quot;bold&quot;),
+    axis.title = element_text(size = 9),
+    plot.subtitle = element_text(size = 11),
+    axis.text = element_text(size = 6.5),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="/2021/04/02/who-is-the-real-tennis-goat/index_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<pre class="r"><code>Big3 &lt;- read_csv(&quot;three.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Roger Federer` = col_character(),
+##   `Rafael Nadal` = col_character(),
+##   `Novak Djokovic` = col_character()
+## )</code></pre>
+<pre class="r"><code>menstitles &lt;- read_csv(&quot;HeadtoHead - three.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   `Record Type` = col_character(),
+##   `Roger Federer` = col_character(),
+##   `Rafael Nadal` = col_character(),
+##   `Novak Djokovic` = col_character()
+## )</code></pre>
+<pre class="r"><code>Big3Titles &lt;- menstitles %&gt;%
+  pivot_wider() </code></pre>
+<pre class="r"><code>Big3Titles %&gt;% pivot_wider %&gt;% kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;)) %&gt;%
+row_spec(5, bold = T, color = &quot;white&quot;, background = &quot;#F1BF00&quot;) %&gt;%
+  row_spec(1, bold = T, color = &quot;white&quot;, background = &quot;#ff0000&quot;) %&gt;%
+row_spec(9, bold = T, color = &quot;white&quot;, background = &quot;#0C4076&quot;) %&gt;% 
+    column_spec(1, bold=T)</code></pre>
+<table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Record Type
+</th>
+<th style="text-align:left;">
+Roger Federer
+</th>
+<th style="text-align:left;">
+Rafael Nadal
+</th>
+<th style="text-align:left;">
+Novak Djokovic
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #ff0000 !important;font-weight: bold;">
+OvrRecordVsFederer
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #ff0000 !important;">
+NA
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #ff0000 !important;">
+24-16
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #ff0000 !important;">
+27-23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+ClayRecordVsFederer
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+14-2
+</td>
+<td style="text-align:left;">
+4-4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+GrassRecordVsFederer
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+1-3
+</td>
+<td style="text-align:left;">
+3-1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+HardRecordVsFederer
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+9-11
+</td>
+<td style="text-align:left;">
+20-18
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #F1BF00 !important;font-weight: bold;">
+OvrRecordVsNadal
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #F1BF00 !important;">
+16-24
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #F1BF00 !important;">
+NA
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #F1BF00 !important;">
+29-27
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+ClayRecordVsNadal
+</td>
+<td style="text-align:left;">
+2-14
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+7-18
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+GrassRecordVsNadal
+</td>
+<td style="text-align:left;">
+3-1
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+2-2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+HardRecordVsNadal
+</td>
+<td style="text-align:left;">
+11-9
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+20-7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #0C4076 !important;font-weight: bold;">
+OvrRecordVsDjokovic
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #0C4076 !important;">
+23-27
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #0C4076 !important;">
+27-29
+</td>
+<td style="text-align:left;font-weight: bold;color: white !important;background-color: #0C4076 !important;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+ClayRecordVsDjokovic
+</td>
+<td style="text-align:left;">
+4-4
+</td>
+<td style="text-align:left;">
+18-7
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+GrassRecordVsDjokovic
+</td>
+<td style="text-align:left;">
+1-3
+</td>
+<td style="text-align:left;">
+2-2
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+HardRecordVsDjokovic
+</td>
+<td style="text-align:left;">
+18-20
+</td>
+<td style="text-align:left;">
+7-20
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

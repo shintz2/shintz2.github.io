@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.81.0" />
 
 
-<title>Cleaning Football Logs - Stephen Hintz&#39;s Github Site</title>
-<meta property="og:title" content="Cleaning Football Logs - Stephen Hintz&#39;s Github Site">
+<title>CLEAN DATA - Stephen Hintz&#39;s Github Site</title>
+<meta property="og:title" content="CLEAN DATA - Stephen Hintz&#39;s Github Site">
 
 
   <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
@@ -65,7 +65,7 @@
     <span class="article-duration">2 min read</span>
     
 
-    <h1 class="article-title">Cleaning Football Logs</h1>
+    <h1 class="article-title">CLEAN DATA</h1>
 
     
     <span class="article-date">2021-03-29</span>
@@ -73,7 +73,7 @@
 
     <div class="article-content">
       
-<script src="/2021/03/29/cleaning-football-logs/index_files/header-attrs/header-attrs.js"></script>
+<script src="/2021/03/29/clean-data/index_files/header-attrs/header-attrs.js"></script>
 
 
 <pre class="r"><code>library(tidyverse)</code></pre>
@@ -85,7 +85,7 @@
 <pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>clean &lt;-read_csv(&quot;badfootballlogs19.csv&quot;)</code></pre>
+<pre class="r"><code>cleancfb &lt;- read_csv(&quot;badfootballlogs19.csv&quot;)</code></pre>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -100,23 +100,26 @@
 ##   Conference = col_character()
 ## )
 ## ℹ Use `spec()` for the full column specifications.</code></pre>
-<pre class="r"><code>clean %&gt;% separate(Result, into = c(&quot;Outcome&quot;, &quot;Score&quot;), sep=&quot; &quot;) %&gt;%
+<pre class="r"><code>cleancfb %&gt;% separate(Result, into = c(&quot;Outcome&quot;, &quot;Score&quot;), sep=&quot; &quot;) %&gt;%
  mutate(Score = gsub(&quot;(&quot;, &quot;&quot;, Score, fixed=TRUE)) %&gt;%
 mutate(Score = gsub(&quot;)&quot;, &quot;&quot;, Score, fixed=TRUE))%&gt;%
- separate(Score, into = c(&quot;TeamScore&quot;, &quot;OpponentScore&quot;), sep=&quot;-&quot;) -&gt; newclean</code></pre>
-<pre class="r"><code>head(newclean)</code></pre>
-<pre><code>## # A tibble: 6 x 53
-##    Game Date  HomeAway Opponent Outcome TeamScore OpponentScore PassingCmp
-##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;              &lt;dbl&gt;
-## 1     1 8/24… N        Miami (… W       24        20                    17
-## 2     2 9/7/… &lt;NA&gt;     Tenness… W       45        0                     30
-## 3     3 9/14… @        Kentucky W       29        21                    21
-## 4     4 9/21… &lt;NA&gt;     Tenness… W       34        3                     24
-## 5     5 9/28… &lt;NA&gt;     Towson   W       38        0                     24
-## 6     6 10/5… &lt;NA&gt;     Auburn   W       24        13                    25
-## # … with 45 more variables: PassingAtt &lt;dbl&gt;, PassingPct &lt;dbl&gt;,
-## #   PassingYds &lt;dbl&gt;, PassingTD &lt;dbl&gt;, RushingAtt &lt;dbl&gt;, RushingYds &lt;dbl&gt;,
-## #   RushingAvg &lt;dbl&gt;, RushingTD &lt;dbl&gt;, OffensivePlays &lt;dbl&gt;,
+ separate(Score, into = c(&quot;TeamScore&quot;, &quot;OpponentScore&quot;), sep=&quot;-&quot;)</code></pre>
+<pre><code>## # A tibble: 1,662 x 53
+##     Game Date  HomeAway Opponent Outcome TeamScore OpponentScore PassingCmp
+##    &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;              &lt;dbl&gt;
+##  1     1 8/24… N        Miami (… W       24        20                    17
+##  2     2 9/7/… &lt;NA&gt;     Tenness… W       45        0                     30
+##  3     3 9/14… @        Kentucky W       29        21                    21
+##  4     4 9/21… &lt;NA&gt;     Tenness… W       34        3                     24
+##  5     5 9/28… &lt;NA&gt;     Towson   W       38        0                     24
+##  6     6 10/5… &lt;NA&gt;     Auburn   W       24        13                    25
+##  7     7 10/1… @        Louisia… L       28        42                    24
+##  8     8 10/1… @        South C… W       38        27                    21
+##  9     9 11/2… N        Georgia  L       17        24                    21
+## 10    10 11/9… &lt;NA&gt;     Vanderb… W       56        0                     27
+## # … with 1,652 more rows, and 45 more variables: PassingAtt &lt;dbl&gt;,
+## #   PassingPct &lt;dbl&gt;, PassingYds &lt;dbl&gt;, PassingTD &lt;dbl&gt;, RushingAtt &lt;dbl&gt;,
+## #   RushingYds &lt;dbl&gt;, RushingAvg &lt;dbl&gt;, RushingTD &lt;dbl&gt;, OffensivePlays &lt;dbl&gt;,
 ## #   OffensiveYards &lt;dbl&gt;, OffenseAvg &lt;dbl&gt;, FirstDownPass &lt;dbl&gt;,
 ## #   FirstDownRush &lt;dbl&gt;, FirstDownPen &lt;dbl&gt;, FirstDownTotal &lt;dbl&gt;,
 ## #   Penalties &lt;dbl&gt;, PenaltyYds &lt;dbl&gt;, Fumbles &lt;dbl&gt;, Interceptions &lt;dbl&gt;,
