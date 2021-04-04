@@ -6,16 +6,7 @@
     <description>Recent content in R on Stephen Hintz&#39;s Github Site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 02 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Who is the real tennis GOAT?</title>
-      <link>/2021/04/02/who-is-the-real-tennis-goat/</link>
-      <pubDate>Fri, 02 Apr 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/2021/04/02/who-is-the-real-tennis-goat/</guid>
-      <description>library(tidyverse) ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ── ## ✓ ggplot2 3.3.3 ✓ purrr 0.3.4 ## ✓ tibble 3.0.5 ✓ dplyr 1.0.3 ## ✓ tidyr 1.1.2 ✓ stringr 1.4.0 ## ✓ readr 1.4.0 ✓ forcats 0.5.0 ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ── ## x dplyr::filter() masks stats::filter() ## x dplyr::lag() masks stats::lag() library(kableExtra) ## ## Attaching package: &amp;#39;kableExtra&amp;#39; ## The following object is masked from &amp;#39;package:dplyr&amp;#39;: ## ## group_rows library(ggrepel) library(cowplot) returnstats &amp;lt;- read_csv(&amp;quot;Career Return Stats - Sheet1-2.</description>
-    </item>
-    
+    <lastBuildDate>Mon, 29 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>CLEAN DATA</title>
       <link>/2021/03/29/clean-data/</link>

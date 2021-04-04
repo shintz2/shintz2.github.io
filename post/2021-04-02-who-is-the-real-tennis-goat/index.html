@@ -1,0 +1,379 @@
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>It’s a question often debated in sports: who’s the “GOAT”?</p>
+<p>So often this prompt is investigated in the context of basketball with LeBron James versus Michael Jordan, or football with Tom Brady or some other historical quarterback. The problem with these? No one will ever know because they never played head-to-head, and never will in their primes.</p>
+<p>That’s why the time we’re living in right now for tennis is so unique. Arguably the three best tennis men’s players of all time are all playing and are only four years apart in age. This scenario opens the door for a productive conversation to find who is truly the greatest men’s tennis player of all time.</p>
+<p>Furthermore, tennis is an individual sport. So often in other “GOAT” discussions, there is the argument that teammates aided in the success of some of the stars. In tennis, it is just the player who does all the work and only gets assistance from the crowd and his/her coach.</p>
+<p>Here, I will take an in-depth look at the numbers to determine who is the GOAT of men’s tennis.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.3     ✓ purrr   0.3.4
+## ✓ tibble  3.0.5     ✓ dplyr   1.0.3
+## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
+## ✓ readr   1.4.0     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(kableExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;kableExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     group_rows</code></pre>
+<pre class="r"><code>library(ggrepel)
+library(cowplot)</code></pre>
+<pre class="r"><code>returnstats &lt;- read_csv(&quot;Career Return Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Return Rating` = col_character(),
+##   `% 1st Serve Return Points Won` = col_character(),
+##   `% 2nd Serve Return Points Won` = col_character(),
+##   `% Return Games Won` = col_character(),
+##   `% Break Points Converted` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>servestats &lt;- read_csv(&quot;Career Serve Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Serve Rating` = col_character(),
+##   `% 1st Serve` = col_character(),
+##   `% 1st Serve Points Won` = col_character(),
+##   `% 2nd Serve Points Won` = col_character(),
+##   `% Service Games Won` = col_character(),
+##   `Aces Per Match` = col_character(),
+##   `Avg Double Faults/Match` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<p>I will be using stats from the ATP Tour’s website that show every player’s career stats in service and return dating back to 1991.</p>
+<p>An important note: serve rating is a formula that adds four service metrics percentages (% 1st Serve Landed, % 1st Serve Points Won, % 2nd Serve Points Won, % Service Games Won) plus the average number of aces per match and minus the average number of double faults per match.</p>
+<p>Return rating is determined by adding a player’s winning percentage in the four major service return categories (% 1st Serve Return Points won, % 2nd Serve Return Points won, % Return Games Won, % Break Points Converted).</p>
+<p>First, I must do some necessary cleaning of the data to omit any missing entries in the data set for the stats on all surfaces.</p>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; returnleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;All&quot;) %&gt;% na.omit() -&gt; serveleadersall</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<p>Next, I need to find the average serve and return rating by taking the mean serve and return rating for every player in the data set. This will be useful for comparison later on.</p>
+<pre class="r"><code>serveleadersall %&gt;% summarise(AvgServe = mean(`Serve Rating`)) </code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     256.</code></pre>
+<pre class="r"><code>returnleadersall %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      139.</code></pre>
+<p>I will combine the serve and return ratings into one data set to make a scatterplot so I joined my data set for serve rating and return rating into a set called “servereturn”.</p>
+<pre class="r"><code>servereturn &lt;- returnleadersall %&gt;% left_join(serveleadersall)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<p>To separate the ‘Big Three’ from the rest of the pack I will make a list of just Roger Federer, Rafael Nadal, and Novak Djokovic. Then, I’m going to filter out their stats from the list of every player’s serve and return ratings, to help me highlight their excellence.</p>
+<pre class="r"><code>Big3 &lt;- c(&quot;Rafael Nadal&quot;, &quot;Novak Djokovic&quot;, &quot;Roger Federer&quot;)</code></pre>
+<pre class="r"><code>B3 &lt;- servereturn %&gt;% filter(Player %in% Big3)</code></pre>
+<p>I’m interested in looking at where the ‘Big Three’ stand in comparison to everyone else who has their stats in my database. To show this, I’m going to make a scatterplot with every player’s data, and I will highlight only Djokovic, Nadal, and Federer.</p>
+<p>I’m going to put serve rating on the x-axis and return rating on the y-axis. I also want to include the averages I found earlier as the vertical line on the x-axis to represent average serve rating and the horizontal line on the y-axis to represent average return rating.</p>
+<p>Reminder:
+Serve rating=(% 1st Serve Landed, % 1st Serve Points Won, % 2nd Serve Points Won, % Service Games Won + Average Aces per Match - Average Double Faults per Match)
+Return Rating=(% 1st Serve Return Points won + % 2nd Serve Return Points won + % Return Games Won + % Break Points Converted)</p>
+<pre class="r"><code>ggplot() + 
+  geom_point(data=servereturn, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_hline(yintercept=138.6383, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=255.5443, color=&quot;dark grey&quot;) +
+    geom_text(aes(x=307, y=165, label=
+  &quot;Good Serve,
+Good Return&quot;), color=&quot;blue&quot;) +
+  geom_text(aes(x=225, y=105, label=
+&quot;Bad Serve, 
+Bad Return&quot;), color=&quot;blue&quot;) +
+  geom_text_repel(data=B3, aes(x=`Serve Rating`, y=`Return Rating`, label=Player))+
+  labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;The &#39;Big Three&#39; stand far apart from the rest&quot;, subtitle=&quot;Federer has the best serve, but Nadal is the best all-around on all surfaces.&quot;, caption=&quot;Source: atptour.com | By Stephen Hintz&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 7),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    legend.position = &quot;none&quot;
+    )</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+We see a few important pieces from this chart. The first is that to be a great player, you must have a good serve and return game. There are many players who rank high in either serve or return alone, but they are left out of the “good serve, good return” quadrant because they lack in one area.</p>
+<p>We also see that no one even comes close to the ‘Big Three’ when it comes to both serve and return rating. Federer has the best serve of the three but lacks in return rating compared to Djokovic and Nadal.
+Additionally, Nadal has both a better serve and return than Djokovic does with points out that he is the best all-around player.</p>
+<p>Now, let’s take a closer look at who ranks in the top 10 all-time in cumulative serve-return rating. I will do this by adding every player’s serve rating and return rating and creating a top 10 list.</p>
+<pre class="r"><code>servereturntop &lt;- servereturn %&gt;% mutate(ServePlusReturn = (`Serve Rating` + `Return Rating`)) %&gt;% top_n(10)</code></pre>
+<pre><code>## Selecting by ServePlusReturn</code></pre>
+<pre class="r"><code>servereturntop %&gt;% 
+  select(Player, `Serve Rating`, `Return Rating`) %&gt;%
+  pivot_longer(
+    cols = -Player,
+    names_to=&quot;Type&quot;, 
+    values_to=&quot;Rating&quot;) -&gt; servereturnchart</code></pre>
+<p>I’m interested in seeing how the current three stack up against all-time greats such as Pete Sampras, Andre Agassi, and others, so this top 10 chart will show me the best players based on career statistics on all surfaces.</p>
+<pre class="r"><code>ggplot(servereturnchart, aes(x=reorder(Player, Rating), weight=Rating, fill=Type)) + 
+  geom_bar() + 
+  coord_flip() + labs(x=&quot;Player&quot;, y=&quot;Cumulative Serve-Return Rating&quot;, title=&quot;The &#39;Big Three&#39; does it all the best, historically &quot;, subtitle=&quot;Among all-time tennis legends, the &#39;Big Three&#39; sit at the top in \ncumulative serve-return ratings.&quot;, caption=&quot;Source: ATP Tour | By Stephen Hintz&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 18, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    plot.subtitle = element_text(size = 12),
+    axis.text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+Sure enough, we see that the current three take the top three spots all time, with Nadal leading. That helps Nadal’s case for being the best of all time, as we already saw he looked to be the best all-around for the previous graphic.</p>
+<p>Another important thing to note is that a majority of players on this list do not have the most overpowering serves, but they do excel at their return game.</p>
+<p>What’s even more outstanding about the greatness of the Big Three? They are putting up these historical numbers while facing the best competition there ever has been. Half of the players on this list are current players (Juan Martin del Potro, and Andy Murray, in addition to the big three), and Andy Roddick (retired 2012) played against the Big Three for a majority of their careers as well. This means that six of the top 10 players all-time played in the 21st century, so there is no doubt that the level of competition was great enough to consider them the greatest three of all time.</p>
+<p>We’ve been looking at the Big Three on all surfaces so far, so let’s shift to looking at different surfaces individually.</p>
+<pre class="r"><code>returnstats &lt;- read_csv(&quot;Career Return Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Return Rating` = col_character(),
+##   `% 1st Serve Return Points Won` = col_character(),
+##   `% 2nd Serve Return Points Won` = col_character(),
+##   `% Return Games Won` = col_character(),
+##   `% Break Points Converted` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<pre class="r"><code>servestats &lt;- read_csv(&quot;Career Serve Stats - Sheet1-2.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   Player = col_character(),
+##   `Serve Rating` = col_character(),
+##   `% 1st Serve` = col_character(),
+##   `% 1st Serve Points Won` = col_character(),
+##   `% 2nd Serve Points Won` = col_character(),
+##   `% Service Games Won` = col_character(),
+##   `Aces Per Match` = col_character(),
+##   `Avg Double Faults/Match` = col_character(),
+##   Surface = col_character()
+## )</code></pre>
+<p>To separate the different surfaces, I want to get the serve and return stats for every player in the data sets on each individual surface.</p>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; serveleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Grass&quot;) %&gt;% na.omit() -&gt; returnleadersgrass</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; serveleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Clay&quot;) %&gt;% na.omit() -&gt; returnleadersclay</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<pre class="r"><code>servestats %&gt;%  mutate(`Serve Rating` = as.numeric(`Serve Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; serveleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Serve Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Serve Rating` is `as.numeric(`Serve Rating`)`.</code></pre>
+<pre class="r"><code>returnstats %&gt;%  mutate(`Return Rating` = as.numeric(`Return Rating`)) %&gt;% filter(Surface==&quot;Hard&quot;) %&gt;% na.omit() -&gt; returnleadershard</code></pre>
+<pre><code>## Warning: Problem with `mutate()` input `Return Rating`.
+## ℹ NAs introduced by coercion
+## ℹ Input `Return Rating` is `as.numeric(`Return Rating`)`.</code></pre>
+<p>Then using the code that I just data that I just pulled for each surface, I want combine the serve and return stats for each individual surface to show me each players serve and return for that surface alone.</p>
+<pre class="r"><code>servereturnhard &lt;- returnleadershard %&gt;% left_join(serveleadershard)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>servereturnclay &lt;- returnleadersclay %&gt;% left_join(serveleadersclay)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<pre class="r"><code>servereturngrass &lt;- returnleadersgrass %&gt;% left_join(serveleadersgrass)</code></pre>
+<pre><code>## Joining, by = c(&quot;Player&quot;, &quot;Surface&quot;)</code></pre>
+<p>Like we saw earlier, I want to have the players in the Big Three highlighted so I will make a separate data frame filtering them out so that I am able to highlight them on the graphic..</p>
+<pre class="r"><code>B3Clay &lt;- servereturnclay %&gt;% filter(Player %in% Big3)
+B3Grass &lt;- servereturngrass %&gt;% filter(Player %in% Big3)
+B3Hard &lt;- servereturnhard %&gt;% filter(Player %in% Big3)</code></pre>
+<p>To find the average serve and return rating on each surface, I find the mean of all of the players. Once again, I will be using these averages for later.</p>
+<pre class="r"><code>serveleadersgrass %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     275.</code></pre>
+<pre class="r"><code>returnleadersgrass %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      132.</code></pre>
+<pre class="r"><code>serveleadersclay %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     251.</code></pre>
+<pre class="r"><code>returnleadersclay %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      148.</code></pre>
+<pre class="r"><code>serveleadershard %&gt;% summarise(AvgServe = mean(`Serve Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgServe
+##      &lt;dbl&gt;
+## 1     275.</code></pre>
+<pre class="r"><code>returnleadershard %&gt;% summarise(AvgReturn = mean(`Return Rating`))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   AvgReturn
+##       &lt;dbl&gt;
+## 1      137.</code></pre>
+<p>Now, I will construct scatterplots for each surface, and putting them all together in a facet wrap that compares how each player does on each surface, and see if there are any substantial differences based on the surface.
+I will highlight the Big Three again on each graph to show where they rank in comparison to everyone else. I will also take the averages in serve and return rating for each surface and place those lines on the x and y intercepts to show how the Big Three perform in comparison to the average (hint: I think they’ll perform very well).</p>
+<pre class="r"><code>Clay &lt;- ggplot() + 
+  geom_point(data=servereturnclay, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Clay, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Clay, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Clay&quot;) + theme_minimal() +
+  geom_hline(yintercept=147.8383, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=251.0672, color=&quot;dark grey&quot;) +
+   theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 11),
+    legend.position = &quot;none&quot;    
+    )</code></pre>
+<pre class="r"><code>Grass &lt;- ggplot() + 
+  geom_point(data=servereturngrass, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Grass, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Grass, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Grass&quot;) + theme_minimal() +
+  geom_hline(yintercept=131.6597, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=274.7437, color=&quot;dark grey&quot;) +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 11),
+    legend.position = &quot;none&quot;
+    )</code></pre>
+<pre class="r"><code>Hard &lt;- ggplot() + 
+  geom_point(data=servereturnhard, aes(x=`Serve Rating`, y=`Return Rating`), color=&quot;light grey&quot;) +
+  geom_point(data=B3Hard, aes(x=`Serve Rating`, y=`Return Rating`, color= &quot;red&quot;)) +
+  geom_text_repel(data=B3Hard, aes(x=`Serve Rating`, y=`Return Rating`, label=Player)) + labs(x=&quot;Serve Rating&quot;, y=&quot;Return Rating&quot;, title=&quot;Hard&quot;) + theme_minimal() + 
+  geom_hline(yintercept=136.794, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=274.7437, color=&quot;dark grey&quot;) +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 11),
+    legend.position = &quot;none&quot;
+    ) </code></pre>
+<p>I have all three graphs, one for each surface, that will be compiled to make the facet wrap. This facet wrap will show each player’s strengths and/or weaknesses dependent on different surfaces and we will be able to draw further conclusion with that finding.</p>
+<pre class="r"><code>plot_grid(Hard, Grass, Clay, ncol=1) + labs(title=&quot;Biggest stars all shine on different surfaces&quot;, subtitle = &quot;All are consistent, but Nadal dominates on clay, Federer favors grass, and Djokovic shines on hard courts.&quot;, caption = &quot;Source: ATP Tour | By Stephen Hintz&quot;) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 30, face = &quot;bold&quot;),
+    axis.title = element_text(size = 15),
+    plot.subtitle = element_text(size = 18),
+    axis.text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    legend.position = &quot;none&quot;
+    )</code></pre>
+<pre><code>## Warning: Removed 303 rows containing missing values (geom_point).</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-28-1.png" width="960" /></p>
+<p>To no surprise to the avid tennis fan, we see that each has their strength, and all three have a different favored surface to play on.</p>
+<p>Djokovic, not the most overpowering server, performs the best on hard as that is the surface that he ranks highest in serve and also performs really well in the return game.</p>
+<p>Federer, whose strength is more his serve rather than his return, performs on par with Nadal and Djokovic on his return on grass surfaces. Federer also serves the best on grass surfaces.</p>
+<p>Rafael Nadal is sometimes referred to as the “King of Clay” and for good reason. He blows the other two out of the water when it comes to his performance on clay as he has a staggering return rating of 190 when playing on clay. In addition to that, he even has a better serve rating than Federer and Djokovic on clay.</p>
+<p>What adds to the uniqueness of this debate for who is the greatest is that not one of them share a most dominant surface. They are extraordinarily consistent, and consistently extraordinary, which still begs the question: which of the three is the greatest?</p>
+<p>We’ve looked at each player’s ratings, but let’s look further into arguably the most important stat, wins and losses.</p>
+<pre class="r"><code>menstitles &lt;- read_csv(&quot;HeadtoHead - three.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   `Record Type` = col_character(),
+##   `Roger Federer` = col_character(),
+##   `Rafael Nadal` = col_character(),
+##   `Novak Djokovic` = col_character()
+## )</code></pre>
+<p>I will create a table that shows each players record versus each other in head-to-head matchups and separate it by surface as well. To do this, I first have to use my data set with each of the three players records versus one another, and then configure it to show the breakdown. For an aesthetically pleasing visual appearance, I also am going to highlight each row that shows the opposing players overall record versus the selected player.</p>
+<pre class="r"><code>Big3Titles &lt;- menstitles %&gt;%
+  pivot_wider()</code></pre>
+<pre class="r"><code>Big3Titles %&gt;% pivot_wider %&gt;% kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;)) %&gt;%
+row_spec(5, bold = T, color = &quot;white&quot;, background = &quot;#F1BF00&quot;) %&gt;%
+  row_spec(1, bold = T, color = &quot;white&quot;, background = &quot;#ff0000&quot;) %&gt;%
+row_spec(9, bold = T, color = &quot;white&quot;, background = &quot;#0C4076&quot;) %&gt;% 
+    column_spec(1, bold=T) %&gt;% save_kable(&quot;HeadtoHead.pdf&quot;)</code></pre>
+<p><img src="images/HeadtoHead.png" style="height:100.0%" />
+The breakdown of records is pretty consistent with the facet wrap from above.</p>
+<p>As expected, Nadal, dominates both Federer and Djokovic on clay courts. Djokovic also has a winning record against both Nadal and Federer.</p>
+<p>The one exception to what we saw above is that Federer has a losing record against Djokovic on grass courts, but it is a small sample size.</p>
+<p>The set up of the ATP tour works against Federer because grass courts are the rarest of the three surfaces to be played on, with clay being the next least played-on court.</p>
+<p>Regardless, all three have decently close records versus each other but Djokovic owns the matchup versus both Nadal and Federer, which is important in the greatest of all time conversation.</p>
+<p>There’s one last thing that we have yet to cover, and it is pretty substantial. Championships.</p>
+<pre class="r"><code>menstitles &lt;- read_csv(&quot;Men&#39;s Titles - Sheet1.csv&quot;)</code></pre>
+<pre><code>## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   .default = col_character(),
+##   Wins = col_double(),
+##   Losses = col_double(),
+##   WinStraightSets = col_double(),
+##   LossStraightSets = col_double(),
+##   AvgSetLengthinWins = col_double(),
+##   AvgSetLengthLoss = col_double(),
+##   Wimbledon = col_double(),
+##   FrenchOpen = col_double(),
+##   AustralianOpen = col_double(),
+##   USOpen = col_double(),
+##   OlympicBronze = col_double(),
+##   OlympicSilver = col_double(),
+##   OlympicGold = col_double()
+## )
+## ℹ Use `spec()` for the full column specifications.</code></pre>
+<p>Using data from the ATP tour’s site, I have will make a bar chart comparing how many grand slam titles and olympic medals each of the three have, in the style of a facet wrap. This breakdown will just include the Big Three and for a readable graph, I will abbreviate some of the names, as shown below:
+AUS = Australian Open
+US = US Open
+French = FrenchOpen
+Wimbledon = Championships at Wimbledon</p>
+<pre class="r"><code>champs &lt;- menstitles %&gt;%
+  filter(Player == &quot;Rafael Nadal&quot; | Player == &quot;Roger Federer&quot; | Player == &quot;Novak Djokovic&quot;) %&gt;%
+  select(Player, Wimbledon, AustralianOpen, USOpen, FrenchOpen, OlympicGold) %&gt;%
+  rename(AUS = AustralianOpen, US = USOpen, French=FrenchOpen, Olympic = OlympicGold) %&gt;%
+  pivot_longer(
+    cols=-Player,
+    names_to = &quot;Slams&quot;,
+    values_to = &quot;Wins&quot;
+  )</code></pre>
+<p>The bars representing each grand slam will be color coded to match the look of the surface. This means both the Australian Open and US Open will be a shade of blue for hard court, the French Open will be a burnt orange for clay, and the Championships at Wimbledon will be green for grass.</p>
+<p>Also, due to space constraints, Olympic medals are scaled at a value of gold medals equaling one, silver as a half, and bronze as a quarter.</p>
+<pre class="r"><code>ggplot() + geom_bar(data=champs, aes(x=Slams, weight=Wins, fill=Slams)) + facet_wrap(~Player) + scale_fill_manual(values=c(&quot;#377DB8&quot;, &quot;#CB5223&quot;, &quot;dark grey&quot;, &quot;#00288b&quot;, &quot;#007b22&quot; )) + theme(axis.text = element_text(size=10)) + 
+  labs(y=&quot;Titles&quot;, title=&quot;Who gets it done on the biggest stage?&quot;, subtitle = &quot;Nadal owns the French Open, Federer the Wimbledon Classic, and Djokovic the Australian Open. \nAll have an olympic medal, but Nadal is the only player to have multiple majors on all surfaces.&quot;, caption = &quot;Source: ATP Tour | By Stephen Hintz&quot;) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 9),
+    plot.subtitle = element_text(size = 10),
+    axis.text = element_text(size = 6.4),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>All three are at the top in all-time grand slam titles as Federer and Nadal have 20, while Djokovic follows behind at 18. Federer turned pro in 1998, Nadal in 2001, and Djokovic in 2003.</p>
+<p>Starting with Federer, it is once again consistent with our model that he has the most Wimbledons of the three with eight total. He has also won 11 titles on hard courts, which only trails Djokovic’s 12 hard court titles. Federer also has a silver medal.</p>
+<p>Djokovic, the best of the three on hard courts, has won a staggering nine Australian Opens but shockingly has the least US Opens of the three. Djokovic has a bronze medal, as well.</p>
+<p>And to no one’s surprise, Nadal has an absurd 13 French Open titles. He is also the only player of the three to win multiple grand slams on each surface. To go along with that, he also is the only one of the three to have an Olympic Gold Medal.</p>
+<p>So, where does all of this leave us?</p>
+<p>We’ve looked at the stats on each player’s ratings and how they stack up compared to all other players in the modern era, and we’ve determined that no one else comes close to the greatness of the Big Three.</p>
+<p>We also ranked the top ten serve-return rated players of all time and seen that the Big Three top that list, and have played against some of the toughest competetion. It also indicated that Nadal was the best of the three when it came to all surfaces.</p>
+<p>Then we looked at each player’s performance on different surfaces and were able to make the determination that each player is consistently excellent on all surfaces, but each player has their own specialty surface in which they dominate.</p>
+<p>Looking at head-to-head matchups, we saw that all the matchups between the three players were tight, but Djokovic was the only one to have a winning record against both Nadal and Federer, giving him a leg up in that regard.</p>
+<p>Finally, we looked at championships and were able to see that Nadal and Federer led overall in total titles, but that Federer had been playing longer so it made more sense that he would have the most of the three. Nadal on the other hand, has been playing for just two years more than Djokovic but had two more titles, and an Olympic gold medal, giving him the advantage there.</p>
+<p>Which leads to the determination, with the information we found, Rafael Nadal is the GOAT…at least for now. Each one of the three still has years left on their career and it will be an intriguing race to see who has the most titles when it is all said and done.</p>
+<p>For right now, Nadal takes the title of the greatest tennis player of all time. But like so often in tennis, no lead is ever safe, especially when you’re playing Djokovic or Federer.</p>

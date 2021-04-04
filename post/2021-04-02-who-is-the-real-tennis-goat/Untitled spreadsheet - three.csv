@@ -1,0 +1,16 @@
+Player,Roger Federer,Rafael Nadal,Novak Djokovic
+OvrRecordVsFederer,NA,24-16,27-23
+ClayRecordVsFederer,NA,14-2,4-4
+GrassRecordVsFederer,NA,1-3,3-1
+HardRecordVsFederer,NA,9-11,20-18
+OvrRecordVsNadal,16-24,NA,29-27
+ClayRecordVsNadal,2-14,NA,7-18
+GrassRecordVsNadal,3-1,NA,2-2
+HardRecordVsNadal,11-9,NA,20-7
+OvrRecordVsDjokovic,23-27,27-29,NA
+ClayRecordVsDjokovic,4-4,18-7,NA
+GrassRecordVsDjokovic,1-3,2-2,NA
+HardRecordVsDjokovic,18-20,7-20,NA
+OlympicBronze,0,0,1
+OlympicSilver,1,0,0
+OlympicGold,0,1,0
