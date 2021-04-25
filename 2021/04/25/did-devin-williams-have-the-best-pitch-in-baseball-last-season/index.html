@@ -76,32 +76,34 @@
 <script src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/header-attrs/header-attrs.js"></script>
 
 
-<p>The 2020 MLB season, albeit shortened, was a historic season for Milwaukee Brewer’s reliever Devin Williams. Williams received the NL Rookie of the Year Award and also was the Brewers third consecutive NL Reliever of the Year award recipient, a feat no rookie has achieved for either league.</p>
+<p>The 2020 MLB season, albeit shortened, was a historic season for Milwaukee Brewer’s reliever Devin Williams. Williams received the NL Rookie of the Year Award and was the Brewers’ third consecutive NL Reliever of the Year award recipient, a feat no rookie has achieved for either league.</p>
 <p>Williams led the league overall in ERA (0.33), opposing batting average (0.90), and opposing slugging percentage (.157) in his first season in the big leagues.</p>
-<p>His dominance was getting noticed so much that the MLB tweeted a poll to see who had the best pitch in baseball. The four candidates were: Shane Bieber’s curveball, Josh Hader’s fastball, Tyler Glasnow’s curveball and Devin William’s fastball.</p>
+<p>His dominance was noticed so much that the MLB tweeted a poll to see who had the best pitch in baseball. The four candidates were: Shane Bieber’s curveball, Josh Hader’s fastball, Tyler Glasnow’s curveball, and Devin William’s fastball.</p>
 <p>This caught my attention and led me to investigate to see who had the best pitch in all of baseball in 2020.</p>
 <pre class="r"><code>library(tidyverse)
 library(ggrepel)
 library(kableExtra)
 library(gt)</code></pre>
-<p>All of the data I use is coming from Baseball Savant’s pitch arsenal stats for the 2020 season. This data set has stats for every pitch type from every pitcher who threw a minimum of 10 plate appearances last season.</p>
+<p>All of the data I use is from Baseball Savant’s pitch arsenal stats for the 2020 season. This data set has stats for every pitch type from every pitcher who threw a minimum of 10 plate appearances last season.</p>
 <pre class="r"><code>pitches &lt;- read_csv(&quot;pitch-arsenal-stats.csv&quot;)</code></pre>
-<p>I want to see whose pitch created the highest percentage of swing-and-misses (whiff rate) as well as whose pitch set down hitters the most (put away percentage) since both of those stats are related. Whiff rate is calculated on a per-pitch basis whereas put away percentage is per-plate-appearance.</p>
-<p>Whiff rate is defined as:
-(swings-and-misses)/(total swings)</p>
-<p>Putaway percentage is defined as:
-The percentage of two-strike pitches that result in a strikeout.</p>
+<p>I want to see whose pitch created the highest percentage of swing-and-misses (whiff rate)and whose pitch set down hitters the most (put away percentage) since both stats are related.</p>
+<p>Whiff rate is calculated on a per-pitch basis; put away percentage is per-plate appearance.</p>
+<p>Whiff rate is swing-and-misses divided by total swings.</p>
+<p>Putaway percentage is the percentage of two-strike pitches that result in a strikeout.</p>
 <pre class="r"><code>pitches %&gt;% 
   select(last_name, pitch_name, put_away, whiff_percent) %&gt;%
-  rename(&quot;Putaway Percentage&quot; = put_away, &quot;Whiff Percentage&quot; = whiff_percent) %&gt;%
+  rename(&quot;Putaway Percentage&quot; = put_away, 
+         &quot;Whiff Percentage&quot; = whiff_percent) %&gt;%
   top_n(10) %&gt;%
   pivot_longer(
     cols = c(-&quot;last_name&quot;, -&quot;pitch_name&quot;),
     names_to=&quot;Stat&quot;, 
     values_to=&quot;Rating&quot;) %&gt;%
   mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;)) -&gt; pitchchart</code></pre>
-<p>To combine both whiff rate and putaway percentage into one graphic. I will make a stacked bar chart which will combine the two statistics next to each other. I will also adjust the names so that the player’s pitch type follows their name to erase the guessing of which pitch type is being depicted.</p>
-<pre class="r"><code>ggplot(pitchchart, aes(x=reorder(Name, Rating), weight=Rating, fill=Stat)) + 
+<p>To combine both whiff rate and putaway percentage into one graphic. I will make a stacked bar chart that will display the two statistics next to each other. I will also adjust the names so that the player’s pitch type follows their name to erase the guessing of which pitch type is depicted.</p>
+<pre class="r"><code>ggplot(pitchchart, aes(x=reorder(Name, Rating),
+                       weight=Rating, 
+                       fill=Stat)) + 
   geom_bar() + 
   coord_flip() + 
   labs(x=&quot;Player&quot;, y=&quot;Cumulative Whiff and Putaway %&quot;, 
@@ -119,38 +121,77 @@ The percentage of two-strike pitches that result in a strikeout.</p>
     panel.grid.major.x = element_blank()
     )</code></pre>
 <p><img src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
-There a few glaring takeaways from this chart. First, there is the large disparity between Devin Williams and the rest of the field. Williams’ changeup led everyone in this top 10 in both putaway and whiff percentage, and cumulatively led by a whopping 20 percentage points.
-Another notable point from this chart is that both Shane Bieber and Tyler Glasnow’s curveballs are featured but Josh Hader is no where to be found in this top ten. This finding can eliminate Hader from the conversation because generating swing-and-misses as well as putting away hitters is one of the most important criteria for determining whose pitch is the best.</p>
-<p>Next, I want to look at how often these pitchers used these pitches, since the chart above is percentages based on pitch types, and also hard hit percentage against each pitch. I will do this using a scatterplot to show Hard hit percentage is as it sounds, how much contact hitters make on said pitch.</p>
-<p>To do this, I will first create a data set with just the players, pitch usage percentage, and hard hit percentage. I will filter the three players mentioned earlier (Devin Williams, Shane Bieber, Tyler Glasnow) and their best pitches. This will be helpful for highlighting these players in scatterplot.</p>
-<p>Note: hard hit percentage is defined as percentage of pitches hit in which the exit velocity off the bat is greater than or equal to 95 mph.</p>
+There a few key takeaways from this chart. First, there is a large disparity between Devin Williams and the rest of the field. Williams’ changeup led everyone in this top 10 in both putaway and whiff percentage and cumulatively led by a whopping 20 percentage points.</p>
+<p>Another notable point from this chart is that both Shane Bieber and Tyler Glasnow’s curveballs are featured, but Josh Hader is not in this top ten. This finding can eliminate Hader from the conversation because generating swing-and-misses and putting hitters away is one of the most important criteria for determining whose pitch is the best.</p>
+<p>Next, I want to look at how often these pitchers used these pitches and the hard hit percentage against each pitch. I will do this using a scatterplot to show. Hard hit percentage is how much contact hitters make on said pitch.</p>
+<p>To do this, I will first create a data set with just the players, pitch usage percentage, and hard hit percentage. I will filter the three players mentioned earlier (Devin Williams, Shane Bieber, Tyler Glasnow) and their best pitches.</p>
+<p>Note: hard hit percentage is the percentage of pitches hit in which the exit velocity off the bat is greater than or equal to 95 mph.</p>
 <pre class="r"><code>pitchplot &lt;- pitches %&gt;% 
-  select(last_name, pitch_name, hard_hit_percent, pitch_usage)
+  select(last_name, 
+         pitch_name, 
+         hard_hit_percent, 
+         pitch_usage)
 
 dw &lt;- pitchplot %&gt;% 
-  filter(last_name == &quot;Williams&quot;, pitch_name == &quot;Changeup&quot;) %&gt;%
-  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
-  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39; &quot;))
+  filter(last_name == &quot;Williams&quot;, 
+         pitch_name == &quot;Changeup&quot;) %&gt;%
+  select(pitch_usage, last_name, 
+         pitch_name, 
+         hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, 
+                      pitch_name, 
+                      sep=&quot;&#39; &quot;))
 
 bieber &lt;- pitchplot %&gt;% 
-  filter(last_name == &quot;Bieber&quot;, pitch_name == &quot;Curveball&quot;) %&gt;%
-  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
-  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;))
+  filter(last_name == &quot;Bieber&quot;, 
+         pitch_name == &quot;Curveball&quot;) %&gt;%
+  select(pitch_usage, 
+         last_name, 
+         pitch_name, 
+         hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, 
+                      pitch_name, 
+                      sep=&quot;&#39;s &quot;))
 
 glasnow &lt;- pitchplot %&gt;% 
-  filter(last_name == &quot;Glasnow&quot;, pitch_name == &quot;Curveball&quot;) %&gt;%
-  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
-  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;))</code></pre>
-<p>For this plot, I will put pitch usage on the x-axis and hard hit percentage on the y-axis. I will also color code all of the different pitch types to show where most pitches reside on the chart. Devin Williams’ changeup, Tyler Glasnow’s curveball, and Shane Bieber’s curveball will all be highlighted in red to separate them from all of the other pitches and show where they rank in comparison to everyone else.</p>
+  filter(last_name == &quot;Glasnow&quot;, 
+         pitch_name == &quot;Curveball&quot;) %&gt;%
+  select(pitch_usage, 
+         last_name, 
+         pitch_name, 
+         hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, 
+                      pitch_name, 
+                      sep=&quot;&#39;s &quot;))</code></pre>
+<p>For this plot, I will put pitch usage on the x-axis and hard hit percentage on the y-axis. I will also color-code all of the different pitch types to show where most pitches reside on the chart. Devin Williams’ changeup, Tyler Glasnow’s curveball, and Shane Bieber’s curveball will all be highlighted in red to separate them from all of the other pitches and show where they rank in comparison to everyone else.</p>
 <pre class="r"><code>ggplot() + 
   geom_point(data=pitchplot, aes(x=pitch_usage, y=hard_hit_percent, color=pitch_name)) +
-  geom_point(data=dw, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
-  geom_point(data=bieber, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
-  geom_point(data=glasnow, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
-  geom_text_repel(data=dw, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) + 
-  geom_text_repel(data=bieber, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) +
-  geom_text_repel(data=glasnow, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) +
-  scale_color_manual(values=c(&quot;#e0c9bf&quot;, &quot;grey&quot;, &quot;#E6E6FA&quot;, &quot;light green&quot;, &quot;#FFCD91&quot;, &quot;light blue&quot;, &quot;light pink&quot;)) + 
+  geom_point(data=dw, 
+             aes(x=pitch_usage, 
+                 y=hard_hit_percent), 
+                 color= &quot;#ff0000&quot;) +
+  geom_point(data=bieber, 
+             aes(x=pitch_usage, 
+                 y=hard_hit_percent), 
+                 color= &quot;#ff0000&quot;) +
+  geom_point(data=glasnow, 
+             aes(x=pitch_usage, 
+                 y=hard_hit_percent), 
+                 color= &quot;#ff0000&quot;) +
+  geom_text_repel(data=dw, 
+                  aes(x=pitch_usage, 
+                      y=hard_hit_percent, 
+                      label=Name)) + 
+  geom_text_repel(data=bieber, 
+                  aes(x=pitch_usage, 
+                      y=hard_hit_percent, 
+                      label=Name)) +
+  geom_text_repel(data=glasnow, 
+                  aes(x=pitch_usage, 
+                      y=hard_hit_percent, 
+                      label=Name)) +
+  scale_color_manual(
+    values=c(&quot;#e0c9bf&quot;, &quot;grey&quot;, &quot;#E6E6FA&quot;, &quot;light green&quot;, &quot;#FFCD91&quot;, &quot;light blue&quot;, &quot;light pink&quot;)) + 
   labs(x=&quot;Pitch Usage&quot;, 
        y=&quot;Hard Hit Percentage&quot;, 
        title=&quot;Williams&#39; changeup is one of the most reliable and soft-hit pitches&quot;, 
@@ -163,20 +204,39 @@ glasnow &lt;- pitchplot %&gt;%
     axis.text = element_text(size = 9)
     ) </code></pre>
 <p><img src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
-From this plot, we can see that Devin Williams has one of the softest hit pitches in baseball, and he uses that pitch more than half the time. All three of the highlighted have a hard hit percentage under 50%, which is good, but Glasnow’s curve and Williams’ changeup are hit significantly softer.
-Williams’ changeup also ranks extremely well in comparison to all other changeups. The vast majority of changeups have a usage under 40%, but Williams’ relied on his changeup much more often, and for good reason. His changeup was hit with an exit velocity over 95 mph only 9.8% of the time.</p>
-<p>Lastly, I want to make a table to display the top ten pitchers’ pitches in run value, and their pitches’ batting average and slugging percentage stats as well. This will tell me whose pitches were the best at keeping batters in check and contributing the most to their team’s defenses.</p>
-<p>Note: Run value the run impact of an event based on the runners on base, outs, ball and strike count. It an algorithm calculated to depict potential runs saved. Using the dataframe I made, I also renamed all of the values for readability in the table.</p>
+From this plot, we can see that Devin Williams has one of the softest hit pitches in baseball, and he uses that pitch more than half the time. All three highlighted had a hard hit percentage under 50%, which is good, but Glasnow’s curve and Williams’ changeup were hit significantly softer.</p>
+<p>Williams’ changeup also ranked well in comparison to all other changeups. The vast majority of changeups had a usage under 40%, but Williams’ relied on his changeup much more often. His changeup was hit with an exit velocity over 95 mph 9.8% of the time.</p>
+<p>Lastly, I want to make a table to display the top ten pitchers’ pitches in run value and their pitches’ batting average and slugging percentage stats. This will tell me whose pitches were the best at keeping batters in check and contributing the most to their team’s defenses.</p>
+<p>Note: Run value the run impact of an event based on the runners on base, outs, ball and strike count. It an equation calculated to depict potential runs saved. Using the data frame I made, I also renamed all of the values for readability in the table.</p>
 <pre class="r"><code>pitches %&gt;% 
-  select(last_name, first_name, pitch_name, run_value, ba, slg) %&gt;%
+  select(last_name, 
+         first_name, 
+         pitch_name, 
+         run_value, 
+         ba, 
+         slg) %&gt;%
   top_n(-10) %&gt;%
   arrange(run_value) -&gt; pitchtable
 
 pitchtable %&gt;%
-  select(last_name, first_name, pitch_name, run_value, ba, slg) %&gt;%
-  rename(Pitch = pitch_name, &quot;Run Value&quot; = run_value , &quot;Opponent batting average&quot; = ba, &quot;Opponent slugging Percentage&quot; = slg) %&gt;%
-  mutate(Name = paste(first_name, last_name, sep=&quot; &quot;)) %&gt;%
-  select(Name, Pitch, &quot;Run Value&quot;, &quot;Opponent batting average&quot;, &quot;Opponent slugging Percentage&quot;) -&gt; newpitchtable</code></pre>
+  select(last_name, 
+         first_name, 
+         pitch_name, 
+         run_value, 
+         ba, 
+         slg) %&gt;%
+  rename(Pitch = pitch_name,
+         &quot;Run Value&quot; = run_value ,
+         &quot;Opponent batting average&quot; = ba,
+         &quot;Opponent slugging Percentage&quot; = slg) %&gt;%
+  mutate(Name = paste(first_name, 
+                      last_name, 
+                      sep=&quot; &quot;)) %&gt;%
+  select(Name,
+         Pitch, 
+         &quot;Run Value&quot;, 
+         &quot;Opponent batting average&quot;, 
+         &quot;Opponent slugging Percentage&quot;) -&gt; newpitchtable</code></pre>
 <p>I will highlight starting pitchers in red, and relief pitches in black to draw comparison between the two types of pitchers.</p>
 <pre class="r"><code>newpitchtable %&gt;%
   gt() %&gt;% 
@@ -221,7 +281,7 @@ pitchtable %&gt;%
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#bfwlkhuemq .gt_table {
+#ytvwhwnijp .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -246,7 +306,7 @@ pitchtable %&gt;%
   border-left-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_heading {
+#ytvwhwnijp .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -258,7 +318,7 @@ pitchtable %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_title {
+#ytvwhwnijp .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -268,7 +328,7 @@ pitchtable %&gt;%
   border-bottom-width: 0;
 }
 
-#bfwlkhuemq .gt_subtitle {
+#ytvwhwnijp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -278,13 +338,13 @@ pitchtable %&gt;%
   border-top-width: 0;
 }
 
-#bfwlkhuemq .gt_bottom_border {
+#ytvwhwnijp .gt_bottom_border {
   border-bottom-style: none;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_col_headings {
+#ytvwhwnijp .gt_col_headings {
   border-top-style: none;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -299,7 +359,7 @@ pitchtable %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_col_heading {
+#ytvwhwnijp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -319,7 +379,7 @@ pitchtable %&gt;%
   overflow-x: hidden;
 }
 
-#bfwlkhuemq .gt_column_spanner_outer {
+#ytvwhwnijp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -331,15 +391,15 @@ pitchtable %&gt;%
   padding-right: 4px;
 }
 
-#bfwlkhuemq .gt_column_spanner_outer:first-child {
+#ytvwhwnijp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#bfwlkhuemq .gt_column_spanner_outer:last-child {
+#ytvwhwnijp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#bfwlkhuemq .gt_column_spanner {
+#ytvwhwnijp .gt_column_spanner {
   border-bottom-style: none;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -351,7 +411,7 @@ pitchtable %&gt;%
   width: 100%;
 }
 
-#bfwlkhuemq .gt_group_heading {
+#ytvwhwnijp .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -373,7 +433,7 @@ pitchtable %&gt;%
   vertical-align: middle;
 }
 
-#bfwlkhuemq .gt_empty_group_heading {
+#ytvwhwnijp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -388,15 +448,15 @@ pitchtable %&gt;%
   vertical-align: middle;
 }
 
-#bfwlkhuemq .gt_from_md > :first-child {
+#ytvwhwnijp .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#bfwlkhuemq .gt_from_md > :last-child {
+#ytvwhwnijp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#bfwlkhuemq .gt_row {
+#ytvwhwnijp .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -415,7 +475,7 @@ pitchtable %&gt;%
   overflow-x: hidden;
 }
 
-#bfwlkhuemq .gt_stub {
+#ytvwhwnijp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -427,7 +487,7 @@ pitchtable %&gt;%
   padding-left: 12px;
 }
 
-#bfwlkhuemq .gt_summary_row {
+#ytvwhwnijp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -437,7 +497,7 @@ pitchtable %&gt;%
   padding-right: 5px;
 }
 
-#bfwlkhuemq .gt_first_summary_row {
+#ytvwhwnijp .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -447,7 +507,7 @@ pitchtable %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_grand_summary_row {
+#ytvwhwnijp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -457,7 +517,7 @@ pitchtable %&gt;%
   padding-right: 5px;
 }
 
-#bfwlkhuemq .gt_first_grand_summary_row {
+#ytvwhwnijp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -467,11 +527,11 @@ pitchtable %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_striped {
+#ytvwhwnijp .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#bfwlkhuemq .gt_table_body {
+#ytvwhwnijp .gt_table_body {
   border-top-style: none;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -480,7 +540,7 @@ pitchtable %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_footnotes {
+#ytvwhwnijp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -494,13 +554,13 @@ pitchtable %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_footnote {
+#ytvwhwnijp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#bfwlkhuemq .gt_sourcenotes {
+#ytvwhwnijp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -514,46 +574,46 @@ pitchtable %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#bfwlkhuemq .gt_sourcenote {
+#ytvwhwnijp .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#bfwlkhuemq .gt_left {
+#ytvwhwnijp .gt_left {
   text-align: left;
 }
 
-#bfwlkhuemq .gt_center {
+#ytvwhwnijp .gt_center {
   text-align: center;
 }
 
-#bfwlkhuemq .gt_right {
+#ytvwhwnijp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#bfwlkhuemq .gt_font_normal {
+#ytvwhwnijp .gt_font_normal {
   font-weight: normal;
 }
 
-#bfwlkhuemq .gt_font_bold {
+#ytvwhwnijp .gt_font_bold {
   font-weight: bold;
 }
 
-#bfwlkhuemq .gt_font_italic {
+#ytvwhwnijp .gt_font_italic {
   font-style: italic;
 }
 
-#bfwlkhuemq .gt_super {
+#ytvwhwnijp .gt_super {
   font-size: 65%;
 }
 
-#bfwlkhuemq .gt_footnote_marks {
+#ytvwhwnijp .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="bfwlkhuemq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="ytvwhwnijp" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="5" class="gt_heading gt_title gt_font_normal" style="color: black; text-align: left; font-weight: bold;">How impactful was Williams' changeup last year?</th>
@@ -653,6 +713,10 @@ pitchtable %&gt;%
   </tfoot>
   
 </table></div>
+<p>Devin Williams had the best pitch among relievers in terms of run value. He also had the lowest opponent batting average and opponent slugging percentage of all pitchers, not just the ten on this list. Williams’ run value can also be attributed to the fact that he came in for high-leverage situations to get the Brewers out of jams. Regardless, his changeup was filthy and simply unhittable.</p>
+<p>If it wasn’t evident before, it should be now: Devin Williams’ changeup was insane. There were some great pitchers with outstanding pitches, but no one compared to Williams.</p>
+<p>Williams’ changeup led all relievers in run value and led all pitchers in opponent batting average and opponent slugging percentage against. He also owned the third softest-hit pitch in all of baseball last season, while generating whiffs and putaways on the changeup at the highest rate in the league.</p>
+<p>Williams won the NL Reliever of the Year, for good reason, and it was undeniable that he had one of the best seasons a rookie has ever had. It was truly an impressive season Williams put together in his first year in the show, and his changeup played a huge part in that.</p>
 
     </div>
   </article>
