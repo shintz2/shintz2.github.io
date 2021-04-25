@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.81.0" />
+
+
+<title>Did Devin Williams have the best pitch in baseball last season - Stephen Hintz&#39;s Github Site</title>
+<meta property="og:title" content="Did Devin Williams have the best pitch in baseball last season - Stephen Hintz&#39;s Github Site">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/stephenhintz">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/stephen_hintz">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">11 min read</span>
+    
+
+    <h1 class="article-title">Did Devin Williams have the best pitch in baseball last season</h1>
+
+    
+    <span class="article-date">2021-04-25</span>
+    
+
+    <div class="article-content">
+      
+<script src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>The 2020 MLB season, albeit shortened, was a historic season for Milwaukee Brewer’s reliever Devin Williams. Williams received the NL Rookie of the Year Award and also was the Brewers third consecutive NL Reliever of the Year award recipient, a feat no rookie has achieved for either league.</p>
+<p>Williams led the league overall in ERA (0.33), opposing batting average (0.90), and opposing slugging percentage (.157) in his first season in the big leagues.</p>
+<p>His dominance was getting noticed so much that the MLB tweeted a poll to see who had the best pitch in baseball. The four candidates were: Shane Bieber’s curveball, Josh Hader’s fastball, Tyler Glasnow’s curveball and Devin William’s fastball.</p>
+<p>This caught my attention and led me to investigate to see who had the best pitch in all of baseball in 2020.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggrepel)
+library(kableExtra)
+library(gt)</code></pre>
+<p>All of the data I use is coming from Baseball Savant’s pitch arsenal stats for the 2020 season. This data set has stats for every pitch type from every pitcher who threw a minimum of 10 plate appearances last season.</p>
+<pre class="r"><code>pitches &lt;- read_csv(&quot;pitch-arsenal-stats.csv&quot;)</code></pre>
+<p>I want to see whose pitch created the highest percentage of swing-and-misses (whiff rate) as well as whose pitch set down hitters the most (put away percentage) since both of those stats are related. Whiff rate is calculated on a per-pitch basis whereas put away percentage is per-plate-appearance.</p>
+<p>Whiff rate is defined as:
+(swings-and-misses)/(total swings)</p>
+<p>Putaway percentage is defined as:
+The percentage of two-strike pitches that result in a strikeout.</p>
+<pre class="r"><code>pitches %&gt;% 
+  select(last_name, pitch_name, put_away, whiff_percent) %&gt;%
+  rename(&quot;Putaway Percentage&quot; = put_away, &quot;Whiff Percentage&quot; = whiff_percent) %&gt;%
+  top_n(10) %&gt;%
+  pivot_longer(
+    cols = c(-&quot;last_name&quot;, -&quot;pitch_name&quot;),
+    names_to=&quot;Stat&quot;, 
+    values_to=&quot;Rating&quot;) %&gt;%
+  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;)) -&gt; pitchchart</code></pre>
+<p>To combine both whiff rate and putaway percentage into one graphic. I will make a stacked bar chart which will combine the two statistics next to each other. I will also adjust the names so that the player’s pitch type follows their name to erase the guessing of which pitch type is being depicted.</p>
+<pre class="r"><code>ggplot(pitchchart, aes(x=reorder(Name, Rating), weight=Rating, fill=Stat)) + 
+  geom_bar() + 
+  coord_flip() + 
+  labs(x=&quot;Player&quot;, y=&quot;Cumulative Whiff and Putaway %&quot;, 
+       title=&quot;Devin Williams&#39; changeup was unhittable&quot;, 
+       subtitle=&quot;Devin Williams changeup was the hardest to hit and one of the \nmost common pitches to be set down with, and it&#39;s not even close.&quot;, 
+       caption=&quot;Source: Baseball Savant | By Stephen Hintz&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    plot.subtitle = element_text(size = 12),
+    axis.text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+    )</code></pre>
+<p><img src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+There a few glaring takeaways from this chart. First, there is the large disparity between Devin Williams and the rest of the field. Williams’ changeup led everyone in this top 10 in both putaway and whiff percentage, and cumulatively led by a whopping 20 percentage points.
+Another notable point from this chart is that both Shane Bieber and Tyler Glasnow’s curveballs are featured but Josh Hader is no where to be found in this top ten. This finding can eliminate Hader from the conversation because generating swing-and-misses as well as putting away hitters is one of the most important criteria for determining whose pitch is the best.</p>
+<p>Next, I want to look at how often these pitchers used these pitches, since the chart above is percentages based on pitch types, and also hard hit percentage against each pitch. I will do this using a scatterplot to show Hard hit percentage is as it sounds, how much contact hitters make on said pitch.</p>
+<p>To do this, I will first create a data set with just the players, pitch usage percentage, and hard hit percentage. I will filter the three players mentioned earlier (Devin Williams, Shane Bieber, Tyler Glasnow) and their best pitches. This will be helpful for highlighting these players in scatterplot.</p>
+<p>Note: hard hit percentage is defined as percentage of pitches hit in which the exit velocity off the bat is greater than or equal to 95 mph.</p>
+<pre class="r"><code>pitchplot &lt;- pitches %&gt;% 
+  select(last_name, pitch_name, hard_hit_percent, pitch_usage)
+
+dw &lt;- pitchplot %&gt;% 
+  filter(last_name == &quot;Williams&quot;, pitch_name == &quot;Changeup&quot;) %&gt;%
+  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39; &quot;))
+
+bieber &lt;- pitchplot %&gt;% 
+  filter(last_name == &quot;Bieber&quot;, pitch_name == &quot;Curveball&quot;) %&gt;%
+  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;))
+
+glasnow &lt;- pitchplot %&gt;% 
+  filter(last_name == &quot;Glasnow&quot;, pitch_name == &quot;Curveball&quot;) %&gt;%
+  select(pitch_usage, last_name, pitch_name, hard_hit_percent) %&gt;%
+  mutate(Name = paste(last_name, pitch_name, sep=&quot;&#39;s &quot;))</code></pre>
+<p>For this plot, I will put pitch usage on the x-axis and hard hit percentage on the y-axis. I will also color code all of the different pitch types to show where most pitches reside on the chart. Devin Williams’ changeup, Tyler Glasnow’s curveball, and Shane Bieber’s curveball will all be highlighted in red to separate them from all of the other pitches and show where they rank in comparison to everyone else.</p>
+<pre class="r"><code>ggplot() + 
+  geom_point(data=pitchplot, aes(x=pitch_usage, y=hard_hit_percent, color=pitch_name)) +
+  geom_point(data=dw, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
+  geom_point(data=bieber, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
+  geom_point(data=glasnow, aes(x=pitch_usage, y=hard_hit_percent), color= &quot;#ff0000&quot;) +
+  geom_text_repel(data=dw, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) + 
+  geom_text_repel(data=bieber, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) +
+  geom_text_repel(data=glasnow, aes(x=pitch_usage, y=hard_hit_percent, label=Name)) +
+  scale_color_manual(values=c(&quot;#e0c9bf&quot;, &quot;grey&quot;, &quot;#E6E6FA&quot;, &quot;light green&quot;, &quot;#FFCD91&quot;, &quot;light blue&quot;, &quot;light pink&quot;)) + 
+  labs(x=&quot;Pitch Usage&quot;, 
+       y=&quot;Hard Hit Percentage&quot;, 
+       title=&quot;Williams&#39; changeup is one of the most reliable and soft-hit pitches&quot;, 
+       subtitle=&quot;Williams uses his changeup more than half the time, but it is still one of the \nhardest pitches to hit well when hitters aren&#39;t whiffing at it.&quot;, 
+       caption=&quot;Source: Baseball Savant | By Stephen Hintz&quot;) + 
+  theme_minimal() +
+   theme(
+    plot.title = element_text(size = 15, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9)
+    ) </code></pre>
+<p><img src="/2021/04/25/did-devin-williams-have-the-best-pitch-in-baseball-last-season/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+From this plot, we can see that Devin Williams has one of the softest hit pitches in baseball, and he uses that pitch more than half the time. All three of the highlighted have a hard hit percentage under 50%, which is good, but Glasnow’s curve and Williams’ changeup are hit significantly softer.
+Williams’ changeup also ranks extremely well in comparison to all other changeups. The vast majority of changeups have a usage under 40%, but Williams’ relied on his changeup much more often, and for good reason. His changeup was hit with an exit velocity over 95 mph only 9.8% of the time.</p>
+<p>Lastly, I want to make a table to display the top ten pitchers’ pitches in run value, and their pitches’ batting average and slugging percentage stats as well. This will tell me whose pitches were the best at keeping batters in check and contributing the most to their team’s defenses.</p>
+<p>Note: Run value the run impact of an event based on the runners on base, outs, ball and strike count. It an algorithm calculated to depict potential runs saved. Using the dataframe I made, I also renamed all of the values for readability in the table.</p>
+<pre class="r"><code>pitches %&gt;% 
+  select(last_name, first_name, pitch_name, run_value, ba, slg) %&gt;%
+  top_n(-10) %&gt;%
+  arrange(run_value) -&gt; pitchtable
+
+pitchtable %&gt;%
+  select(last_name, first_name, pitch_name, run_value, ba, slg) %&gt;%
+  rename(Pitch = pitch_name, &quot;Run Value&quot; = run_value , &quot;Opponent batting average&quot; = ba, &quot;Opponent slugging Percentage&quot; = slg) %&gt;%
+  mutate(Name = paste(first_name, last_name, sep=&quot; &quot;)) %&gt;%
+  select(Name, Pitch, &quot;Run Value&quot;, &quot;Opponent batting average&quot;, &quot;Opponent slugging Percentage&quot;) -&gt; newpitchtable</code></pre>
+<p>I will highlight starting pitchers in red, and relief pitches in black to draw comparison between the two types of pitchers.</p>
+<pre class="r"><code>newpitchtable %&gt;%
+  gt() %&gt;% 
+  tab_header(
+    title = &quot;How impactful was Williams&#39; changeup last year?&quot;,
+    subtitle = &quot;In terms of run value, Devin Williams&#39; changeup ranked second but was first in both opponent batting average and opponent slugging percentage. It is also the only changeup to rank in the top ten in run value.&quot;
+  ) %&gt;% 
+  tab_style(
+    style = cell_text(color = &quot;black&quot;, weight = &quot;bold&quot;, align = &quot;left&quot;),
+    locations = cells_title(&quot;title&quot;)
+  ) %&gt;% 
+  tab_style(
+    style = cell_text(color = &quot;black&quot;, align = &quot;left&quot;),
+    locations = cells_title(&quot;subtitle&quot;)
+  ) %&gt;%
+  tab_source_note(
+    source_note = &quot;By: Stephen Hintz&quot;
+  ) %&gt;%
+  tab_source_note(
+    source_note = md(&quot;Source: [Baseball Savant](https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats?type=pitcher&amp;pitchType=&amp;year=2020&amp;team=&amp;min=10)&quot;)
+  ) %&gt;%
+  opt_row_striping() %&gt;% 
+  opt_table_lines(&quot;none&quot;) %&gt;% 
+  tab_style(
+    style = cell_borders(sides = c(&quot;top&quot;, &quot;bottom&quot;), 
+                         color = &quot;grey&quot;, weight = px(1)),
+    locations = cells_column_labels(everything())
+  ) %&gt;% 
+  tab_style(
+    style = cell_text(color = &quot;black&quot;, weight = &quot;bold&quot;),
+    locations = cells_body(
+      columns = vars(Name)
+    )) %&gt;% 
+  tab_style(
+    style = cell_text(color = &quot;red&quot;, weight = &quot;bold&quot;),
+    locations = cells_body(
+      columns = vars(Name),
+      rows = c(1,3,5,6,7,8)
+    ))</code></pre>
+<pre><code>## Warning: The `.dots` argument of `group_by()` is deprecated as of dplyr 1.0.0.</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#bfwlkhuemq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: none;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bfwlkhuemq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bfwlkhuemq .gt_bottom_border {
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_col_headings {
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bfwlkhuemq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bfwlkhuemq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bfwlkhuemq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bfwlkhuemq .gt_column_spanner {
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bfwlkhuemq .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bfwlkhuemq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bfwlkhuemq .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bfwlkhuemq .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bfwlkhuemq .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: none;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bfwlkhuemq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#bfwlkhuemq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bfwlkhuemq .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bfwlkhuemq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: none;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bfwlkhuemq .gt_table_body {
+  border-top-style: none;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#bfwlkhuemq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bfwlkhuemq .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#bfwlkhuemq .gt_left {
+  text-align: left;
+}
+
+#bfwlkhuemq .gt_center {
+  text-align: center;
+}
+
+#bfwlkhuemq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bfwlkhuemq .gt_font_normal {
+  font-weight: normal;
+}
+
+#bfwlkhuemq .gt_font_bold {
+  font-weight: bold;
+}
+
+#bfwlkhuemq .gt_font_italic {
+  font-style: italic;
+}
+
+#bfwlkhuemq .gt_super {
+  font-size: 65%;
+}
+
+#bfwlkhuemq .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="bfwlkhuemq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="5" class="gt_heading gt_title gt_font_normal" style="color: black; text-align: left; font-weight: bold;">How impactful was Williams' changeup last year?</th>
+    </tr>
+    <tr>
+      <th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style="color: black; text-align: left;">In terms of run value, Devin Williams' changeup ranked second but was first in both opponent batting average and opponent slugging percentage. It is also the only changeup to rank in the top ten in run value.</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="border-top-width: 1px; border-top-style: solid; border-top-color: grey; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: grey;">Name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="border-top-width: 1px; border-top-style: solid; border-top-color: grey; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: grey;">Pitch</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="border-top-width: 1px; border-top-style: solid; border-top-color: grey; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: grey;">Run Value</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="border-top-width: 1px; border-top-style: solid; border-top-color: grey; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: grey;">Opponent batting average</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="border-top-width: 1px; border-top-style: solid; border-top-color: grey; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: grey;">Opponent slugging Percentage</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left" style="color: red; font-weight: bold;">Dinelson Lamet</td>
+      <td class="gt_row gt_left">Slider</td>
+      <td class="gt_row gt_right">-17</td>
+      <td class="gt_row gt_right">0.080</td>
+      <td class="gt_row gt_right">0.120</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_striped" style="color: black; font-weight: bold;">Devin Williams</td>
+      <td class="gt_row gt_left gt_striped">Changeup</td>
+      <td class="gt_row gt_right gt_striped">-13</td>
+      <td class="gt_row gt_right gt_striped">0.032</td>
+      <td class="gt_row gt_right gt_striped">0.032</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="color: red; font-weight: bold;">Walker Buehler</td>
+      <td class="gt_row gt_left">4-Seamer</td>
+      <td class="gt_row gt_right">-10</td>
+      <td class="gt_row gt_right">0.102</td>
+      <td class="gt_row gt_right">0.119</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_striped" style="color: black; font-weight: bold;">Blake Taylor</td>
+      <td class="gt_row gt_left gt_striped">4-Seamer</td>
+      <td class="gt_row gt_right gt_striped">-10</td>
+      <td class="gt_row gt_right gt_striped">0.120</td>
+      <td class="gt_row gt_right gt_striped">0.140</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="color: red; font-weight: bold;">Kevin Gausman</td>
+      <td class="gt_row gt_left">Splitter</td>
+      <td class="gt_row gt_right">-9</td>
+      <td class="gt_row gt_right">0.097</td>
+      <td class="gt_row gt_right">0.139</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_striped" style="color: red; font-weight: bold;">Zach Plesac</td>
+      <td class="gt_row gt_left gt_striped">Slider</td>
+      <td class="gt_row gt_right gt_striped">-9</td>
+      <td class="gt_row gt_right gt_striped">0.069</td>
+      <td class="gt_row gt_right gt_striped">0.103</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="color: red; font-weight: bold;">Trevor Bauer</td>
+      <td class="gt_row gt_left">Slider</td>
+      <td class="gt_row gt_right">-7</td>
+      <td class="gt_row gt_right">0.075</td>
+      <td class="gt_row gt_right">0.132</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_striped" style="color: red; font-weight: bold;">Cristian Javier</td>
+      <td class="gt_row gt_left gt_striped">Slider</td>
+      <td class="gt_row gt_right gt_striped">-6</td>
+      <td class="gt_row gt_right gt_striped">0.075</td>
+      <td class="gt_row gt_right gt_striped">0.075</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="color: black; font-weight: bold;">Michael Lorenzen</td>
+      <td class="gt_row gt_left">4-Seamer</td>
+      <td class="gt_row gt_right">-5</td>
+      <td class="gt_row gt_right">0.075</td>
+      <td class="gt_row gt_right">0.075</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_striped" style="color: black; font-weight: bold;">James Karinchak</td>
+      <td class="gt_row gt_left gt_striped">Curveball</td>
+      <td class="gt_row gt_right gt_striped">-4</td>
+      <td class="gt_row gt_right gt_striped">0.140</td>
+      <td class="gt_row gt_right gt_striped">0.140</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="5">By: Stephen Hintz</td>
+    </tr>
+    <tr>
+      <td class="gt_sourcenote" colspan="5">Source: <a href="https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats?type=pitcher&amp;pitchType=&amp;year=2020&amp;team=&amp;min=10">Baseball Savant</a></td>
+    </tr>
+  </tfoot>
+  
+</table></div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
